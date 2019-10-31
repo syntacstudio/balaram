@@ -1,0 +1,42 @@
+{
+    "name": "syntac/balaram",
+    "description": ":description",
+    "license": "license",
+    "authors": [
+        {
+            "name": "Willy Arisky",
+            "email": "willy@syntac.co.id",
+            "homepage": "https://syntac.co"
+        }
+    ],
+    "homepage": "https://github.com/syntacstudio/backuplaraveltotelegram",
+    "keywords": ["Laravel", "balaram", "Telegram", "Backup"],
+    "require": {
+        "illuminate/support": "~5",
+        "spatie/db-dumper": "^2.14",
+        "longman/telegram-bot": "^0.60.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~7.0",
+        "mockery/mockery": "^1.1",
+        "orchestra/testbench": "~3.0",
+        "sempro/phpunit-pretty-print": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Syntac\\Balaram\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Syntac\\Balaram\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Syntac\\Balaram\\BalaramServiceProvider"
+            ]
+        }
+    }
+}
