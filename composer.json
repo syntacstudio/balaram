@@ -1,7 +1,7 @@
 {
     "name": "syntac/balaram",
-    "description": ":description",
-    "license": "license",
+    "description": "Backup Laravel app to Telegram automatically",
+    "license": "MIT",
     "authors": [
         {
             "name": "Willy Arisky",
@@ -12,6 +12,7 @@
     "homepage": "https://github.com/syntacstudio/backuplaraveltotelegram",
     "keywords": ["Laravel", "balaram", "Telegram", "Backup"],
     "require": {
+        "php": "^7.0",
         "illuminate/support": "~5",
         "spatie/db-dumper": "^2.14",
         "longman/telegram-bot": "^0.60.0"
@@ -32,6 +33,7 @@
             "Syntac\\Balaram\\Tests\\": "tests"
         }
     },
+    "minimum-stability": "dev",
     "extra": {
         "laravel": {
             "providers": [
