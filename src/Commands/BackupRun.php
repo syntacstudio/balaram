@@ -163,32 +163,53 @@ class BackupRun extends Command
             $bot_token      = config('balaram.telegram.token');
             $bot_username   = config('balaram.telegram.bot_username');
 
-            try {
-                $this->info('Starting to upload your backup files to telegram.');
+            $fileSize   = filesize(storage_path('app/'.$fileBackup));
+            $dbSize     = filesize(storage_path('app/'.$dbBackup));
 
+            try {
                 // Create Telegram API object
                 $telegram = new Telegram($bot_token, $bot_username);
 
-                Request::sendMessage([
-                    'chat_id' => config('balaram.telegram.chat_id'),
-                    'text' => 'Backup files for website '. config('app.name') .' ('. config('app.url') .') generated at: '. Carbon::now()
-                ]);
+                if($fileSize < 50000000){
+                    $this->info('Starting to upload your backup files to telegram.');
             
-                Request::sendDocument([
-                    'chat_id' => config('balaram.telegram.chat_id'),
-                    'document' => storage_path('app/'.$fileBackup)
-                ]);
+                    Request::sendDocument([
+                        'chat_id' => config('balaram.telegram.chat_id'),
+                        'document' => storage_path('app/'.$fileBackup),
+                        'caption' => 'Backup files for website '. config('app.name') .' ('. config('app.url') .') generated at: '. Carbon::now()
+                    ]);
 
-                Request::sendDocument([
-                    'chat_id' => config('balaram.telegram.chat_id'),
-                    'document' => storage_path('app/'.$dbBackup)
-                ]);
+                    $this->info('Your backup files successfully uploaded to telegram.');
+                } else {
+                    $this->info('Your backup files size more than 50mb, we can\'t upload your backup files to telegram.');
+                    Request::sendMessage([
+                        'chat_id' => config('balaram.telegram.chat_id'),
+                        'text' => 'Your backup files size more than 50mb, we can\'t upload your backup files to telegram.'
+                    ]);
+                }
+
+                if($dbSize < 50000000){
+                    $this->info('Starting to upload your backup database file to telegram.');
+
+                    Request::sendDocument([
+                        'chat_id' => config('balaram.telegram.chat_id'),
+                        'document' => storage_path('app/'.$dbBackup),
+                        'caption' => 'Backup database file for website '. config('app.name') .' ('. config('app.url') .') generated at: '. Carbon::now()
+                    ]);
+
+                    $this->info('Your backup database file successfully uploaded to telegram.');
+                } else {
+                    $this->info('Your backup database file size more than 50mb, we can\'t upload your backup files to telegram.');
+
+                    Request::sendMessage([
+                        'chat_id' => config('balaram.telegram.chat_id'),
+                        'text' => 'Your backup database file size more than 50mb, we can\'t upload your backup files to telegram.'
+                    ]);
+                }
 
                 unlink(storage_path('app/'.$fileBackup));
                 unlink(storage_path('app/'.$dbBackup));
-
-                $this->info('Your backup files successfully uploaded to telegram.');
-
+                
             } catch (Longman\TelegramBot\Exception\TelegramException $e) {
                 $this->error($e->getMessage());
 
