@@ -17,13 +17,19 @@ $ composer require syntac/balaram
 
 ## Usage
 add these ENV vars to your ENV file
+``` code
 BACKUP_TARGET=storage,public
-BACKUP_DATABASE=true
-BACKUP_DATABSE_TYPE=MySql
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
-TELEGRAM_BOT_USERNAME=
 
+BACKUP_DATABASE=true
+
+BACKUP_DATABSE_TYPE=MySql
+
+TELEGRAM_BOT_TOKEN=
+
+TELEGRAM_CHAT_ID=
+
+TELEGRAM_BOT_USERNAME=
+``` 
 then add artisan command "backup:run" to your Console/Kernel.php set the variety of schedules you may assign to backup task.
 
 ## Change log
