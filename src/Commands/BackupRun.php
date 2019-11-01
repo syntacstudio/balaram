@@ -2,19 +2,19 @@
 
 namespace Syntac\Balaram\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Str;
+use zipArchive;
 use Carbon\Carbon;
-use \zipArchive;
-use \RecursiveIteratorIterator;
-use \RecursiveDirectoryIterator;
+use Illuminate\Support\Str;
+use RecursiveIteratorIterator;
+use Illuminate\Console\Command;
+use RecursiveDirectoryIterator;
+use Longman\TelegramBot\Request;
+use Longman\TelegramBot\Telegram;
 use Spatie\DbDumper\Databases\MySql;
-use Spatie\DbDumper\Databases\PostgreSql;
 use Spatie\DbDumper\Databases\SQLite;
 use Spatie\DbDumper\Databases\MongoDB;
+use Spatie\DbDumper\Databases\PostgreSql;
 use Spatie\DbDumper\Compressors\GzipCompressor;
-use Longman\TelegramBot\Telegram;
-use Longman\TelegramBot\Request;
 
 class BackupRun extends Command
 {
@@ -33,8 +33,8 @@ class BackupRun extends Command
     protected $description = 'Start to backup Laravel app into telegram';
 
     /**
-     * Supported db
-     * 
+     * Supported db.
+     *
      * @var array
      */
     protected $supportedDB = ['MySql', 'PostgreSQL', 'SQLite', 'MongoDB'];
@@ -50,34 +50,36 @@ class BackupRun extends Command
     }
 
     /**
-     * Backup file name
-     * 
+     * Backup file name.
+     *
      * @return string
      */
-    protected function backupFileName(){
+    protected function backupFileName()
+    {
         return Str::slug('files-backup-'.config('app.name').'-'.Carbon::now()).'.zip';
     }
 
     /**
-     * Database backup file name
-     * 
+     * Database backup file name.
+     *
      * @return string
      */
-    protected function dbBackupFileName(){
+    protected function dbBackupFileName()
+    {
         return Str::slug('database-backup-'.config('app.name').'-'.Carbon::now()).'.sql.gz';
     }
 
     /**
-     * Target directory will be compressed
-     * 
+     * Target directory will be compressed.
+     *
      * @return string
      */
     protected function targetDir()
     {
-        $folders    = explode(',', config('balaram.target'));
-        $target     = [];
+        $folders = explode(',', config('balaram.target'));
+        $target = [];
 
-        foreach($folders as $folder) {
+        foreach ($folders as $folder) {
             $target[$folder] = base_path($folder);
         }
 
@@ -91,16 +93,16 @@ class BackupRun extends Command
      */
     public function handle()
     {
-        $targets    = $this->targetDir();
+        $targets = $this->targetDir();
         $fileBackup = $this->backupFileName();
-        $dbBackup   = $this->dbBackupFileName();
+        $dbBackup = $this->dbBackupFileName();
 
         // Initialize archive object
         $zip = new ZipArchive();
         $zip->open(storage_path('app/'.$fileBackup), ZipArchive::CREATE | ZipArchive::OVERWRITE);
-        
+
         $this->info('Starting to compress your website files');
-        foreach($targets as $folder => $path) {
+        foreach ($targets as $folder => $path) {
             // Create recursive directory iterator
             $files = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator($path),
@@ -109,7 +111,7 @@ class BackupRun extends Command
 
             foreach ($files as $name => $file) {
                 // Skip directories (they would be added automatically)
-                if (!$file->isDir()) {
+                if (! $file->isDir()) {
                     // Get real and relative path for current file
                     $filePath = $file->getRealPath();
                     $relativePath = substr($filePath, strlen($path) + 1);
@@ -126,25 +128,25 @@ class BackupRun extends Command
         $this->info('Starting to dump your website database.');
 
         // dump database if enable
-        if( config('balaram.database.backup') && in_array(config('balaram.database.type'), $this->supportedDB) ) {
+        if (config('balaram.database.backup') && in_array(config('balaram.database.type'), $this->supportedDB)) {
             // dump database proccess
             switch (config('balaram.database.type')) {
                 case 'MySql':
                     $dumper = MySql::create();
                     break;
-                
+
                 case 'PostgreSQL':
                     $dumper = PostgreSql::create();
                     break;
-                
+
                 case 'SQLite':
                     $dumper = SQLite::create();
                     break;
-                
+
                 case 'MongoDB':
                     $dumper = MongoDB::create();
                     break;
-                
+
                 default:
                     $dumper = MySql::create();
                     break;
@@ -160,23 +162,23 @@ class BackupRun extends Command
 
             $this->info('Your website database successfully archived.');
 
-            $bot_token      = config('balaram.telegram.token');
-            $bot_username   = config('balaram.telegram.bot_username');
+            $bot_token = config('balaram.telegram.token');
+            $bot_username = config('balaram.telegram.bot_username');
 
-            $fileSize   = filesize(storage_path('app/'.$fileBackup));
-            $dbSize     = filesize(storage_path('app/'.$dbBackup));
+            $fileSize = filesize(storage_path('app/'.$fileBackup));
+            $dbSize = filesize(storage_path('app/'.$dbBackup));
 
             try {
                 // Create Telegram API object
                 $telegram = new Telegram($bot_token, $bot_username);
 
-                if($fileSize < 50000000){
+                if ($fileSize < 50000000) {
                     $this->info('Starting to upload your backup files to telegram.');
-            
+
                     Request::sendDocument([
                         'chat_id' => config('balaram.telegram.chat_id'),
                         'document' => storage_path('app/'.$fileBackup),
-                        'caption' => 'Backup files for website '. config('app.name') .' ('. config('app.url') .') generated at: '. Carbon::now()
+                        'caption' => 'Backup files for website '.config('app.name').' ('.config('app.url').') generated at: '.Carbon::now(),
                     ]);
 
                     $this->info('Your backup files successfully uploaded to telegram.');
@@ -184,17 +186,17 @@ class BackupRun extends Command
                     $this->info('Your backup files size more than 50mb, we can\'t upload your backup files to telegram.');
                     Request::sendMessage([
                         'chat_id' => config('balaram.telegram.chat_id'),
-                        'text' => 'Your backup files size more than 50mb, we can\'t upload your backup files to telegram.'
+                        'text' => 'Your backup files size more than 50mb, we can\'t upload your backup files to telegram.',
                     ]);
                 }
 
-                if($dbSize < 50000000){
+                if ($dbSize < 50000000) {
                     $this->info('Starting to upload your backup database file to telegram.');
 
                     Request::sendDocument([
                         'chat_id' => config('balaram.telegram.chat_id'),
                         'document' => storage_path('app/'.$dbBackup),
-                        'caption' => 'Backup database file for website '. config('app.name') .' ('. config('app.url') .') generated at: '. Carbon::now()
+                        'caption' => 'Backup database file for website '.config('app.name').' ('.config('app.url').') generated at: '.Carbon::now(),
                     ]);
 
                     $this->info('Your backup database file successfully uploaded to telegram.');
@@ -203,19 +205,18 @@ class BackupRun extends Command
 
                     Request::sendMessage([
                         'chat_id' => config('balaram.telegram.chat_id'),
-                        'text' => 'Your backup database file size more than 50mb, we can\'t upload your backup files to telegram.'
+                        'text' => 'Your backup database file size more than 50mb, we can\'t upload your backup files to telegram.',
                     ]);
                 }
 
                 unlink(storage_path('app/'.$fileBackup));
                 unlink(storage_path('app/'.$dbBackup));
-                
             } catch (Longman\TelegramBot\Exception\TelegramException $e) {
                 $this->error($e->getMessage());
 
                 Request::sendMessage([
                     'chat_id' => config('balaram.telegram.chat_id'),
-                    'text' => $e->getMessage()
+                    'text' => $e->getMessage(),
                 ]);
             }
         }

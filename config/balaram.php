@@ -24,23 +24,23 @@ return [
          |
          | 3- Go to following url: https://api.telegram.org/botXXX:YYYY/getUpdates
          | replace XXX:YYYY with your bot token
-         | 
+         |
          | 4- Look for “chat”:{“id”:-zzzzzzzzzz,
          | -zzzzzzzzzz is your chat id (with the negative sign).
          */
-        'chat_id' => env('TELEGRAM_CHAT_ID')
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
     ],
 
     'database' => [
-        /**
+        /*
          * Set to false if you won't backup the database
          */
         'backup' => env('BACKUP_DATABASE', true),
-        /**
+        /*
          * Database type
          * Supported db: MySql, PostgreSQL, SQLite, MongoDB
          * Default: MySql
          */
-        'type' => env('BACKUP_DATABSE_TYPE', 'MySql')
-    ]
+        'type' => env('BACKUP_DATABSE_TYPE', 'MySql'),
+    ],
 ];
